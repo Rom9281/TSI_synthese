@@ -86,13 +86,13 @@ static void init()
 static void display_callback()
 {
   //effacement des couleurs du fond d'ecran
-  glClearColor(0.01f*counter, 0.1f, 0.1f, 1.0f); CHECK_GL_ERROR();
+  glClearColor(0.1f, 0.1f, 0.1f*counter, 1.0f); CHECK_GL_ERROR();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
   //on incrémente le compteur de secondes de 0.25 à chaque passage
   counter += 0.25;
   
   //question 10
-  glDrawArrays(GL_LINE_LOOP, 0, 3); CHECK_GL_ERROR();
+  glDrawArrays(GL_TRIANGLES, 0, 3); CHECK_GL_ERROR();
   
   /*
  //test affichage fil de fer
@@ -100,7 +100,7 @@ static void display_callback()
   glDrawArrays(GL_POINTS, 0, 3);
   glDrawArrays(GL_LINE_LOOP, 0, 3);
   */
-  //Changement de buffer d'affichage pour eviter un effet de scintillement
+  //Changement de buffer d'afficvoidmain (void){floatx=gl_FragCoord.x/600.0;floaty=gl_FragCoord.y/600.0;floatr=abs(cos(15.0*x+29.0*y));floatg=0.0;if(abs(cos(25.0*x*x))>0.95)g=1.0;elseg=0.0;color = vec4(r,g,0.0,0.0);}hage pour eviter un effet de scintillement
   glutSwapBuffers();
 }
 
@@ -128,7 +128,7 @@ static void keyboard_callback(unsigned char key, int, int)
  \*****************************************************************************/
 static void timer_callback(int)
 {
-  //demande de rappel de cette fonction dans 25ms
+  //demande de rappel de cette fonction dans 25ms (soit 40fps)
   glutTimerFunc(25, timer_callback, 0);
 
   //reactualisation de l'affichage
