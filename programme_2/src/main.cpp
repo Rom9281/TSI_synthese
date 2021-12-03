@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
+#include <ctime>
 
 #define GLEW_STATIC 1
 #include <GL/glew.h>
@@ -39,11 +40,19 @@ GLuint shader_program_id;
 GLuint vao=0;
 GLuint vbo=0;
 
+float rand1 = 0.01;
+
+float translation_x=0.0f;
+float translation_y=0.0f;
+float translation_z=0.0f;
+
+
 /*****************************************************************************\
  * init                                                                      *
  \*****************************************************************************/
 static void init()
 {
+  srand(time(NULL));
 
   float sommets[]={0.0f,0.0f,0.0f,
     0.8f,0.0f,0.0f,
@@ -83,9 +92,7 @@ static void display_callback()
   glClearColor(0.5f, 0.6f, 0.9f, 1.0f); CHECK_GL_ERROR();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
 
-  float translation_x=0.0f;
-  float translation_y=0.0f;
-  float translation_z=0.0f;
+
 
   GLint loc_translation = glGetUniformLocation(shader_program_id, "translation"); CHECK_GL_ERROR();
   if (loc_translation == -1) std::cerr << "Pas de variable uniforme : translation" << std::endl;
@@ -95,6 +102,22 @@ static void display_callback()
 
   //Changement de buffer d'affichage pour eviter un effet de scintillement
   glutSwapBuffers();
+
+  
+if ((translation_x > 1)&&(translation_y > 1)){
+  rand1 = -0.01;
+}
+else if ((translation_x < -1)&&(translation_y < -1)){
+  rand1 = 0.01;
+}
+
+  translation_x += rand1;
+  translation_y += rand1;
+  translation_z += rand1;
+  
+
+  printf("(%f,%f,%f)\n",translation_x,translation_y,translation_z);
+
 }
 
 /*****************************************************************************\

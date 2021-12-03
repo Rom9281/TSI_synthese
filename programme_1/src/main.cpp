@@ -99,6 +99,7 @@ static void display_callback()
 
   //Changement de buffer d'affichage pour eviter un effet de scintillement
   glutSwapBuffers();
+  
 }
 
 /*****************************************************************************\
