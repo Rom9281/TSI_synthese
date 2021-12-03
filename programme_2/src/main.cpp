@@ -39,6 +39,12 @@ GLuint shader_program_id;
 GLuint vao=0;
 GLuint vbo=0;
 
+//compteur de temps
+float counter = 0;
+
+//coefficient de sens de déplacement
+int sens = -1;
+
 /*****************************************************************************\
  * init                                                                      *
  \*****************************************************************************/
@@ -83,8 +89,8 @@ static void display_callback()
   glClearColor(0.5f, 0.6f, 0.9f, 1.0f); CHECK_GL_ERROR();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
 
-  float translation_x=0.0f;
-  float translation_y=0.0f;
+  float translation_x=counter;
+  float translation_y=counter;
   float translation_z=0.0f;
 
   GLint loc_translation = glGetUniformLocation(shader_program_id, "translation"); CHECK_GL_ERROR();
@@ -95,6 +101,14 @@ static void display_callback()
 
   //Changement de buffer d'affichage pour eviter un effet de scintillement
   glutSwapBuffers();
+
+  if (abs(counter)>1){
+    sens = -sens;
+  }
+  counter +=(sens*0.01);
+ 
+  
+  
 }
 
 /*****************************************************************************\
