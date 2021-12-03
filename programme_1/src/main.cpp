@@ -26,6 +26,7 @@
 #include "glhelper.hpp"
 
 
+
 /*****************************************************************************\
  * Variables globales
  *
@@ -34,6 +35,8 @@
 
 //identifiant du shader
 GLuint shader_program_id;
+
+float counter = 0;
 
 /*****************************************************************************\
  * init                                                                      *
@@ -54,8 +57,10 @@ static void init()
 static void display_callback()
 {
   //effacement des couleurs du fond d'ecran
-  glClearColor(0.5f, 0.6f, 0.9f, 1.0f); CHECK_GL_ERROR();
+  glClearColor(0.1f, 0.9f, 0.6f, 1.0f); CHECK_GL_ERROR();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
+  counter += rand();
+  counter += - rand();
 
   //Changement de buffer d'affichage pour eviter un effet de scintillement
   glutSwapBuffers();
@@ -85,6 +90,8 @@ static void keyboard_callback(unsigned char key, int, int)
  \*****************************************************************************/
 static void timer_callback(int)
 {
+
+  // printf("Obs\n"); TEST
   //demande de rappel de cette fonction dans 25ms
   glutTimerFunc(25, timer_callback, 0);
 
