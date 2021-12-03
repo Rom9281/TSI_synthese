@@ -35,6 +35,13 @@
 //identifiant du shader
 GLuint shader_program_id;
 
+//question 6 : compteur de secondes
+float counter = 0;
+
+//question 7
+GLuint vao;
+GLuint vbo;
+
 /*****************************************************************************\
  * init                                                                      *
  \*****************************************************************************/
@@ -48,15 +55,51 @@ static void init()
 
   //activation de la gestion de la profondeur
   glEnable(GL_DEPTH_TEST); CHECK_GL_ERROR();
+
+  //question 7 : création des sommets du triangle
+  float sommets[] = {0.0f,0.0f,0.0f,
+  0.8f,0.0f,0.0f,
+  0.0f,0.8f,0.0f};
+
+  //attribution d'une liste d' ́etat (1 indique la cr ́eation d'une seule liste)
+  glGenVertexArrays(1, &vao);
+  //affectation de la liste d' ́etat courante
+  glBindVertexArray(vao);
+  //attribution d’un buffer de donnees (1 indique la cr ́eation d’un seul buffer)
+  glGenBuffers(1,&vbo); CHECK_GL_ERROR();
+  //affectation du buffer courant
+  glBindBuffer(GL_ARRAY_BUFFER,vbo); CHECK_GL_ERROR();
+  //copie des donnees des sommets sur la carte graphique
+  glBufferData(GL_ARRAY_BUFFER,sizeof(sommets),sommets,GL_STATIC_DRAW);
+  CHECK_GL_ERROR();
+
+  // Les deux commandes suivantes sont stockées dans l' ́etat du vao courant
+  // Active l'utilisation des donn ́ees de positions
+  // (le 0 correspond`a la location dans le vertex shader)
+  glEnableVertexAttribArray(0); CHECK_GL_ERROR();
+  // Indique comment le buffer courant (dernier vbo "bind ́e")
+  // est utilis ́e pour les positions des sommets
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); CHECK_GL_ERROR();
 }
 
 //Fonction d'affichage
 static void display_callback()
 {
   //effacement des couleurs du fond d'ecran
-  glClearColor(0.5f, 0.6f, 0.9f, 1.0f); CHECK_GL_ERROR();
+  glClearColor(0.01f*counter, 0.1f, 0.1f, 1.0f); CHECK_GL_ERROR();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
-
+  //on incrémente le compteur de secondes de 0.25 à chaque passage
+  counter += 0.25;
+  
+  //question 10
+  glDrawArrays(GL_LINE_LOOP, 0, 3); CHECK_GL_ERROR();
+  
+  /*
+ //test affichage fil de fer
+  glPointSize(5.0);
+  glDrawArrays(GL_POINTS, 0, 3);
+  glDrawArrays(GL_LINE_LOOP, 0, 3);
+  */
   //Changement de buffer d'affichage pour eviter un effet de scintillement
   glutSwapBuffers();
 }
@@ -90,6 +133,10 @@ static void timer_callback(int)
 
   //reactualisation de l'affichage
   glutPostRedisplay();
+  /*
+  //question 4
+  printf("Bonjour");
+  */
 }
 
 int main(int argc, char** argv)
