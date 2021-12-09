@@ -39,6 +39,7 @@ GLuint shader_program_id;
 //l'identifiant de l'objet 3D
 GLuint vao=0;
 GLuint vbo=0;
+GLuint vboi;
 
 //les parametres de translations
 float translation_x=0.0f;
@@ -54,15 +55,25 @@ mat4 rotation;
 //Matrice de projection
 mat4 projection;
 
+//sommets triangles ?
+unsigned int index[]={0,1,2,0,1,3};
+
 /*****************************************************************************\
  * init                                                                      *
  \*****************************************************************************/
 static void init()
 {
 
+/*
   float sommets[]={0.0f,0.0f,0.0f,
     1.0f,0.0f,0.0f,
     0.0f,1.0f,0.0f};
+*/
+
+  float sommets[]={0.0f,0.0f,0.0f,
+  1.0f,0.0f,0.0f,
+  0.0f,1.0f,0.0f,
+  0.0f,0.0f,1.0f};
 
   //attribution d'une liste d'état (1 indique la création d'une seule liste)
   glGenVertexArrays(1, &vao);
@@ -95,6 +106,15 @@ static void init()
 
   //activation de la gestion de la profondeur
   glEnable(GL_DEPTH_TEST); CHECK_GL_ERROR();
+
+  //attribution d’un autre buffer de donnees
+  glGenBuffers(1,&vboi);
+  //affectation du buffer courant (buffer d’indice)
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vboi);
+  //copie des indices sur la carte graphique
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(index),
+  index,GL_STATIC_DRAW);
+
 }
 
 //Fonction d'affichage
@@ -112,7 +132,7 @@ static void display_callback()
   if (loc_translation == -1) std::cerr << "Pas de variable uniforme : translation" << std::endl;
   glUniform4f(loc_translation,translation_x,translation_y,translation_z,0.0f); CHECK_GL_ERROR();
 
-  glDrawArrays(GL_TRIANGLES, 0, 3); CHECK_GL_ERROR();
+  glDrawElements(GL_TRIANGLES, 2*3, GL_UNSIGNED_INT, 0); CHECK_GL_ERROR();
 
   //Changement de buffer d'affichage pour eviter un effet de scintillement
   glutSwapBuffers();
