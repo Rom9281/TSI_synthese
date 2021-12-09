@@ -22,4 +22,6 @@ void main (void)
 
   //position dans l'espace ecran
   gl_Position = p;
+
+  
 }
