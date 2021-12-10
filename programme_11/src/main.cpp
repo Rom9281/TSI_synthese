@@ -38,6 +38,10 @@
  *
  \*****************************************************************************/
 
+//angles de rotation des stégosaures
+float angle_steg1 = 0;
+float angle_steg2 = 0;
+
 //identifiant du shader
 GLuint shader_program_id;
 GLuint gui_program_id;
@@ -63,6 +67,12 @@ GLuint vboi_object_3=0;
 GLuint texture_id_object_3=0;
 int nbr_triangle_object_3;
 
+//identifiants pour object 4 (stégosaure 2)
+GLuint vao_object_4=0;
+GLuint vbo_object_4=0;
+GLuint vboi_object_4=0;
+GLuint texture_id_object_4=0;
+int nbr_triangle_object_4;
 
 //Matrice de transformation
 struct transformation
@@ -78,6 +88,7 @@ struct transformation
 transformation transformation_model_1;
 transformation transformation_model_2;
 transformation transformation_model_3;
+transformation transformation_model_4;
 
 //Transformation de la vue (camera)
 transformation transformation_view;
@@ -106,10 +117,12 @@ void load_texture(const char* filename,GLuint *texture_id);
 void init_model_1();
 void init_model_2();
 void init_model_3();
+void init_model_4();
 
 void draw_model_1();
 void draw_model_2();
 void draw_model_3();
+void draw_model_4();
 
 void init_text(text *t){
   vec3 p0=vec3( 0.0f, 0.0f, 0.0f);
@@ -189,12 +202,14 @@ static void init()
   init_model_2();
   // Charge modele 3 sur la carte graphique
   init_model_3();
+  // Charge modele 3 sur la carte graphique
+  init_model_4();
 
   gui_program_id = glhelper::create_program_from_file("programme_11/src/gui.vert", "programme_11/src/gui.frag"); CHECK_GL_ERROR();
 
-  text_to_draw.value = "CPE";
-  text_to_draw.bottomLeft = vec2(-0.2, 0.5);
-  text_to_draw.topRight = vec2(0.2, 1);
+  text_to_draw.value = "STEGOSAURE simulator 9000";
+  text_to_draw.bottomLeft = vec2(-1.0, 0.5);
+  text_to_draw.topRight = vec2(0.5, 1.5);
   init_text(&text_to_draw);
 
 }
@@ -229,12 +244,15 @@ static void display_callback()
     glUniform4f(loc_translation_view , tv.x,tv.y,tv.z , 0.0f); CHECK_GL_ERROR();
   }
 
+
   // Affiche le modele numero 1 (dinosaure)
   draw_model_1();
   // Affiche le modele numero 2 (sol)
   draw_model_2();
   // Affiche le modele numero 2 (monstre)
   draw_model_3();
+  // Affiche le modele numero 4 (steg 2)
+  draw_model_4();
 
   glDisable(GL_DEPTH_TEST);
   glUseProgram(gui_program_id);
@@ -308,23 +326,26 @@ static void keyboard_callback(unsigned char key, int, int)
     //  transformation_view.translation = extract_translation(transformation_view.rotation);
   }
 
+  /*
   {
-    //  // Exemple camera fps :
-    //  transformation_view.rotation_center = vec3();
-    //  vec3 pos_camera = transformation_model_1.translation + vec3(0.,-0.5,-2.) + transformation_model_1.rotation * vec3(0., 0.3, 0.);
-    //  vec3 target = pos_camera + transformation_model_1.rotation * vec3(0., 0., 1.)  ;
-    //  transformation_view.rotation = matrice_lookat(pos_camera, target, vec3(0., 1., 0.));
-    //  transformation_view.translation = extract_translation(transformation_view.rotation);
+    // Exemple camera fps :
+    transformation_view.rotation_center = vec3();
+    vec3 pos_camera = transformation_model_1.translation + vec3(0.,-0.5,-2.) + transformation_model_1.rotation * vec3(0., 0.3, 0.);
+    vec3 target = pos_camera + transformation_model_1.rotation * vec3(0., 0., 1.)  ;
+    transformation_view.rotation = matrice_lookat(pos_camera, target, vec3(0., 1., 0.));
+    transformation_view.translation = extract_translation(transformation_view.rotation);
   }
-
+  */
+  
   {
-    //  // Exemple camera troisieme personne :
-    //  transformation_view.rotation_center = vec3();
-    //  vec3 target = transformation_model_1.translation + vec3(0.,-0.5,-2.);
-    //  vec3 pos_camera = target - transformation_model_1.rotation * vec3(0., -3., 5.)  ;
-    //  transformation_view.rotation = matrice_lookat(pos_camera, target, vec3(0., 1., 0.));
-    //  transformation_view.translation = extract_translation(transformation_view.rotation);
+    // Exemple camera troisieme personne :
+    transformation_view.rotation_center = vec3();
+    vec3 target = transformation_model_1.translation + vec3(0.,-0.5,-2.);
+    vec3 pos_camera = target - transformation_model_1.rotation * vec3(0., -3., 5.)  ;
+    transformation_view.rotation = matrice_lookat(pos_camera, target, vec3(0., 1., 0.));
+    transformation_view.translation = extract_translation(transformation_view.rotation);
   }
+  
 }
 
 /*****************************************************************************\
@@ -352,12 +373,25 @@ static void special_callback(int key, int,int)
 
 
 /*****************************************************************************\
- * timer_callback                                                            *
+ * timer_callback                                  ouch                          *
  \*****************************************************************************/
 static void timer_callback(int)
 {
   //demande de rappel de cette fonction dans 25ms
   glutTimerFunc(25, timer_callback, 0);
+
+
+  //Déplacement continu du stégosaure 1
+  float ds1=0.02f; //unité de déplacement
+  transformation_model_1.translation.z += ds1; //translation
+  angle_steg1+=0.01;
+  transformation_model_1.rotation = matrice_rotation(angle_steg1, 0.0f,1.0f,0.0f); //rotation
+  
+  //Déplacement continu du stégosaure 2
+  float ds2=0.03f; //unité de déplacement
+  transformation_model_4.translation.z += ds2; //translation
+  angle_steg2+=-0.01;
+  transformation_model_4.rotation = matrice_rotation(angle_steg2, 0.0f,1.0f,0.0f); //rotation
 
   //reactualisation de l'affichage
   glutPostRedisplay();
@@ -499,6 +533,35 @@ void draw_model_3()
   }
 }
 
+void draw_model_4()
+{
+
+  //envoie des parametres uniformes
+  {
+    GLint loc_rotation_model = glGetUniformLocation(shader_program_id, "rotation_model"); CHECK_GL_ERROR();
+    if (loc_rotation_model == -1) std::cerr << "Pas de variable uniforme : rotation_model" << std::endl;
+    glUniformMatrix4fv(loc_rotation_model,1,false,pointeur(transformation_model_4.rotation));    CHECK_GL_ERROR();
+
+    vec3 c = transformation_model_4.rotation_center;
+    GLint loc_rotation_center_model = glGetUniformLocation(shader_program_id, "rotation_center_model"); CHECK_GL_ERROR();
+    if (loc_rotation_center_model == -1) std::cerr << "Pas de variable uniforme : rotation_center_model" << std::endl;
+    glUniform4f(loc_rotation_center_model , c.x,c.y,c.z , 0.0f);                                 CHECK_GL_ERROR();
+
+    vec3 t = transformation_model_4.translation;
+    GLint loc_translation_model = glGetUniformLocation(shader_program_id, "translation_model"); CHECK_GL_ERROR();
+    if (loc_translation_model == -1) std::cerr << "Pas de variable uniforme : translation_model" << std::endl;
+    glUniform4f(loc_translation_model , t.x,t.y,t.z , 0.0f);                                     CHECK_GL_ERROR();
+  }
+
+  glBindVertexArray(vao_object_4);CHECK_GL_ERROR();
+
+  //affichage
+  {
+    glBindTexture(GL_TEXTURE_2D, texture_id_object_4);                             CHECK_GL_ERROR();
+    glDrawElements(GL_TRIANGLES, 3*nbr_triangle_object_4, GL_UNSIGNED_INT, 0);     CHECK_GL_ERROR();
+  }
+
+}
 
 void init_model_1()
 {
@@ -652,7 +715,7 @@ void init_model_2()
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(index),index,GL_STATIC_DRAW);  CHECK_GL_ERROR();
 
   // Chargement de la texture
-  load_texture("data/grass.tga",&texture_id_object_2);
+  load_texture("data/unicorn.tga",&texture_id_object_2);
 
 }
 
@@ -719,6 +782,74 @@ void init_model_3()
 
   // Chargement de la texture
   load_texture("data/white.tga",&texture_id_object_3);
+
+
+}
+
+void init_model_4()
+{
+  // Chargement d'un maillage a partir d'un fichier
+  mesh m = load_obj_file("data/stegosaurus.obj");
+
+  // Affecte une transformation sur les sommets du maillage
+  float s = 0.2f;
+  mat4 transform = mat4(  s, 0.0f, 0.0f, 1.0f,
+                          0.0f,    s, 0.0f,-0.9f,
+                          0.0f, 0.0f,   s ,-2.0f,
+                          0.0f, 0.0f, 0.0f, 1.0f);
+  apply_deformation(&m,transform);
+
+  // Centre la rotation du modele 1 autour de son centre de gravite approximatif
+  transformation_model_4.rotation_center = vec3(0.0f,-0.5f,-2.0f);
+
+  // Calcul automatique des normales du maillage
+  update_normals(&m);
+  // Les sommets sont affectes a une couleur blanche
+  fill_color(&m,vec3(1.0f,1.0f,1.0f));
+
+  //attribution d'une liste d'état (1 indique la création d'une seule liste)
+  glGenVertexArrays(1, &vao_object_4);
+  glBindVertexArray(vao_object_4);
+
+  //attribution d'un buffer de donnees (1 indique la création d'un buffer)
+  glGenBuffers(1,&vbo_object_4); CHECK_GL_ERROR();
+  //affectation du buffer courant
+  glBindBuffer(GL_ARRAY_BUFFER,vbo_object_4); CHECK_GL_ERROR();
+  //copie des donnees des sommets sur la carte graphique
+  glBufferData(GL_ARRAY_BUFFER,m.vertex.size()*sizeof(vertex_opengl),&m.vertex[0],GL_STATIC_DRAW); CHECK_GL_ERROR();
+
+  // Active l'utilisation des données de positions (le 0 correspond à la location dans le vertex shader)
+  glEnableVertexAttribArray(0); CHECK_GL_ERROR();
+  // Indique comment le buffer courant (dernier vbo "bindé") est utilisé pour les positions des sommets
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_opengl), 0); CHECK_GL_ERROR();
+
+  // Active l'utilisation des données de normales (le 1 correspond à la location dans le vertex shader)
+  glEnableVertexAttribArray(1); CHECK_GL_ERROR();
+  // Indique comment le buffer courant (dernier vbo "bindé") est utilisé pour les normales des sommets
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(vertex_opengl), (void*)sizeof(vec3)); CHECK_GL_ERROR();
+
+  // Active l'utilisation des données de couleurs (le 2 correspond à la location dans le vertex shader)
+  glEnableVertexAttribArray(2); CHECK_GL_ERROR();
+  // Indique comment le buffer courant (dernier vbo "bindé") est utilisé pour les couleurs des sommets
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_opengl), (void*)(2*sizeof(vec3))); CHECK_GL_ERROR();
+
+  // Active l'utilisation des données de textures (le 3 correspond à la location dans le vertex shader)
+  glEnableVertexAttribArray(3); CHECK_GL_ERROR();
+  // Indique comment le buffer courant (dernier vbo "bindé") est utilisé pour les textures des sommets
+  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_opengl), (void*)(3*sizeof(vec3))); CHECK_GL_ERROR();
+
+  //attribution d'un autre buffer de donnees
+  glGenBuffers(1,&vboi_object_4); CHECK_GL_ERROR();
+  //affectation du buffer courant (buffer d'indice)
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vboi_object_4); CHECK_GL_ERROR();
+  //copie des indices sur la carte graphique
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,m.connectivity.size()*sizeof(triangle_index),&m.connectivity[0],GL_STATIC_DRAW); CHECK_GL_ERROR();
+
+  // Nombre de triangles de l'objet 1
+  nbr_triangle_object_4 = m.connectivity.size();
+
+  // Chargement de la texture
+  load_texture("data/stegosaurus.tga",&texture_id_object_4);
 
 
 }
